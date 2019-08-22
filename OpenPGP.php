@@ -34,18 +34,17 @@ class OpenPGP
     function parse()
     {
         $encodedInput = $this->unarmor();
-        $userId = "";
+        $userIds = [];
         while (($length = strlen($encodedInput)) > 0) {
             if (($userId = $this->decode($encodedInput))) {
-                //Found User Id string exit out
-                break;
+               $userIds[] = $userId;
             }
             if ($length == strlen($encodedInput)) {
                 //Reached the end of key, exit out
                 break;
             }
         }
-        return $userId;
+        return $userIds;
     }
 
 
@@ -84,12 +83,11 @@ class OpenPGP
                 $this->parseOldHeader($encodedInput);
             $encodedInput = substr($encodedInput, $headerLength);
             if ($tag == self::USER_ID_TAG) {
-                return substr($encodedInput, 0, $dataLength);
-            } else {
-                $encodedInput = substr($encodedInput, $dataLength);
+                $userId = substr($encodedInput, 0, $dataLength);
             }
+            $encodedInput = substr($encodedInput, $dataLength);
         }
-        return false;
+        return $userId;
     }
 
 
